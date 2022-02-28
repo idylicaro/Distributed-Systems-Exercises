@@ -21,20 +21,25 @@ public class Server extends Thread {
             // try read input client (filename) - Timeout 1 minute
             BufferedReader inFromClient = new BufferedReader(new InputStreamReader(client.getInputStream()));
             String filename = "arquivos\\"+ (inFromClient.readLine()); // todo: if timeout 1 minute -> close connection
-            // todo: filename exists?
             // send file
-            FileInputStream fileIn = new FileInputStream(filename);
-            OutputStream socketOut = client.getOutputStream();
-            byte[] cbuffer = new byte[1024];
-            int bytesRead;
-            System.out.println("Sending... : " + filename);
-            while ((bytesRead = fileIn.read(cbuffer)) != -1) {
-                socketOut.write(cbuffer, 0, bytesRead);
-                socketOut.flush();
+            File file = new File(filename);
+            if(file.exists()){
+                FileInputStream fileIn = new FileInputStream(file);
+                OutputStream socketOut = client.getOutputStream();
+                byte[] cbuffer = new byte[1024];
+                int bytesRead;
+                System.out.println("Sending... : " + filename);
+                while ((bytesRead = fileIn.read(cbuffer)) != -1) {
+                    socketOut.write(cbuffer, 0, bytesRead);
+                    socketOut.flush();
+                }
+                fileIn.close();
+                client.close();
+                System.out.println("File sent!");
+            }else{
+                System.out.println("Can't find file");
+                client.close();
             }
-            fileIn.close();
-            client.close();
-            System.out.println("File sent!");
 
         } catch (IOException e) {
             e.printStackTrace();
